@@ -1,6 +1,6 @@
 <?php
 require_once("./php/locale.php");
-require_once("./php/db.php");
+require_once("./php/db_pdo.php");
 require_once("./php/helper.php");
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
@@ -9,19 +9,37 @@ require_once("./php/helper.php");
     <title>OpenFlights.org: <?php echo _("Flight logging, mapping, stats and sharing") ?></title>
     <meta name="description" content="Free open-source tool for logging, mapping, calculating and sharing your flights and trips.">
     <meta name="keywords" content="flight,memory,logging,mapping,statistics,sharing">
+	<meta http-equiv="Content-Security-Policy" content="default-src 'none' ;
+	    font-src 'self' fonts.googleapis.com
+	                    fonts.gstatic.com ;
+	    img-src 'self' data: cartodb-basemaps-1.global.ssl.fastly.net
+	                    stamen-tiles.a.fastly.net
+	                    api.tiles.mapbox.com
+	                    www.googletagmanager.com www.google-analytics.com;
+	    style-src 'self' 'unsafe-inline' www.googletagmanager.com www.google-analytics.com
+	                    www.gstatic.com fonts.googleapis.com ;
+	    script-src      'self' 'unsafe-inline' www.googletagmanager.com www.google-analytics.com
+	                    www.google.com/jsapi www.gstatic.com ;
+        connect-src     'self' www.google-analytics.com;
+	    child-src 'none' ;
+	    object-src 'none' ;
+        upgrade-insecure-requests;
+        block-all-mixed-content; ;">
     <link rel="stylesheet" href="/css/style_reset.css" type="text/css">
     <link rel="stylesheet" href="<?php echo fileUrlWithDate("/openflights.css") ?>" type="text/css">
     <link rel="gettext" type="application/x-po" href="/locale/<?php echo $locale?>/LC_MESSAGES/messages.po?20090715" />
     <link rel="icon" type="image/png" href="/img/icon_favicon.png"/>
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script type="text/javascript" src="/OpenLayers.js?version=20091204"></script>
-    <script type="text/javascript" src="/js/greatcircle.js?version=20121108"></script>
+    <script type="text/javascript" src="/js/greatcircle.js?version=20190320"></script>
     <script type="text/javascript" src="/js/utilities.js?version=20120817"></script>
     <script type="text/javascript" src="/js/Gettext.js"></script>
     <script type="text/javascript" src="/js/scw.js"></script>
-    <script type="text/javascript" src="/js/prototype.js?version=20090326"></script>
-    <script type="text/javascript" src="/js/scriptaculous.js?version=20091230"></script>
+    <script type="text/javascript" src="/js/prototype.js"></script>
+    <script type="text/javascript" src="/js/scriptaculous.js"></script>
+    <script type="text/javascript" src="/js/controls.js"></script>
     <script type="text/javascript" src="<?php echo fileUrlWithDate("/openflights.js") ?>"></script>
+    <?php include("./html/analytics.html") ?>
   </head>
 
   <body>
@@ -68,7 +86,7 @@ require_once("./php/helper.php");
 	    <?php include("./sidebar.html") ?>
 	    <div id="login">
 	      <div id="langselect" style="display: block; text-align: right; margin-bottom: 10px">
-                <?php echo locale_pulldown($db, $locale) ?>
+                <?php echo locale_pulldown($dbh, $locale) ?>
 	      </div>
 
 	      <div id="loginstatus" style="display: none"></div>
@@ -78,11 +96,11 @@ require_once("./php/helper.php");
 		<table cellspacing="5" cellpadding="0" border="0">
  		  <tr>
                     <td><?php echo _("Username") ?>&nbsp;</td><td>
-		      <input type="Text" name="name" align="top" size="10" tabindex="1">
+		      <input type="Text" name="name" align="top" size="10" tabindex="1" onKeyPress='keyPress("CHANGE", "login")'>
 		    </td>
 		  </tr><tr>
 		  <td align=right><?php echo _("Password") ?>&nbsp;</td><td>
-		      <input type="password" name="pw" align="top" size="10" tabindex="2" onKeyPress='JavaScript:keyPress(event, "login")' onChange='keyPress("CHANGE", "login")'>	    
+		      <input type="password" name="pw" align="top" size="10" tabindex="2" onKeyPress='keyPress("CHANGE", "login")'>
  		      <input type="hidden" name="challenge">    
 		    </td>
 		  </tr><tr>
